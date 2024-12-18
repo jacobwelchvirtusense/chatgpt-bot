@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Bot</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #chat-container { max-width: 600px; margin: auto; }
+        #messages { border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: scroll; }
+        #input-container { margin-top: 10px; }
+        #user-input { width: 80%; padding: 10px; }
+        #send-button { padding: 10px; }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <h1>ChatGPT Bot</h1>
+        <div id="messages"></div>
+        <div id="input-container">
+            <input type="text" id="user-input" placeholder="Type your message" />
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = "your_openai_api_key"; // Replace with your OpenAI API Key
+        const endpoint = "https://api.openai.com/v1/chat/completions";
+        const messagesDiv = document.getElementById("messages");
+        const userInput = document.getElementById("user-input");
+
+        document.getElementById("send-button").addEventListener("click", async () => {
+            const userMessage = userInput.value;
+            if (!userMessage) return;
+
+            appendMessage("User", userMessage);
+            userInput.value = "";
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}`,
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-4", // or "gpt-3.5-turbo"
+                        messages: [{ role: "user", content: userMessage }],
+                    }),
+                });
+                const data = await response.json();
+                const botReply = data.choices[0].message.content;
+                appendMessage("Bot", botReply);
+            } catch (error) {
+                appendMessage("Bot", "Error: Unable to connect to the API.");
+            }
+        });
+
+        function appendMessage(sender, message) {
+            const messageDiv = document.createElement("div");
+            messageDiv.textContent = `${sender}: ${message}`;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+    </script>
+</body>
+</html>
